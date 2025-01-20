@@ -1,0 +1,37 @@
+Routes
+   - task/add - adicionar tarefa
+      {
+         id
+         descricao
+         data
+         status
+      }
+   - task/update/id-task - editar tarefa
+      {
+         id
+         descricao
+         data
+         status (complete|in_progress)
+      }
+   - task/delete/id-task - deletar tarefa
+      {
+         id
+         descricao
+         data
+         status (completed|in_progress)
+      }
+   - task/getAll - recuperar todas as tarefas
+      {
+         id
+         descricao
+         data
+         status (completed|in_progress)
+      }
+
+   - task/id-task - recuperar uma tarefa especifica
+      {
+         id
+         descricao
+         data
+         status (completed|in_progress)
+      }
