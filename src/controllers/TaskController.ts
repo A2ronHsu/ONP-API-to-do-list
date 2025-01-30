@@ -1,8 +1,10 @@
 import { Request,Response } from "express";
 
 import TaskService from "../services/TaskService";
-import TaskRepository from "../repositories/TaskRepository";
 import { Task } from "../models/Task";
+import { GetSchema } from "../schemas/TaskSchema";
+import { object } from "yup";
+
 const taskService = new TaskService();
 
 class TaskController{
@@ -10,50 +12,60 @@ class TaskController{
 
    }
 
-   getAll(Req: Request, Res: Response){
-      const {status, data } = Req.query;
+   async getAll(Req: Request, Res: Response){
+      try {
+         console.log(Req.query);
+         await GetSchema.validate(Req.query);
+         const {status, date } = Req.query;
+         let result : Task[] = [];
+         if (status) {
+            const data : Task[] = taskService.getByStatus(status as string);
+            result.concat(data.filter((elem)=>result.some(task => task.id === elem.id)));
+         }
+         if (date) {
+            const data : Task[] = taskService.getByDate(status as string);
+            result.concat(data.filter((elem)=>result.some(task => task.id === elem.id)));
+         };
+         if(!date && !status){
+            result = taskService.getAll();
+         }
+         Res.json(result);
+         Res.status(200);
+
+      } catch (error) {
+         Res.json(error);
+         Res.status(401)
+      }
       
-      if(!data && !status){
-         const allTask = taskService.getAll();
-         return Res.json(allTask);
+      // if(!data && !status){
+      //    const allTask = taskService.getAll();
+      //    return Res.json(allTask);
          
-      }
+      // }
 
-      if (status ){
-         if(status === 'in_progress' || status === 'completed'){
-            const getBy = taskService.getByStatus(status);
-            return Res.json(getBy);
+      // if (status ){
+      //    if(status === 'in_progress' || status === 'completed'){
+      //       const getBy = taskService.getByStatus(status);
+      //       return Res.json(getBy);
 
-         }else{
-            Res.statusCode = 400;
-            return Res.json({
-               error: 'not valid status'
-            });
-         }
-      }
+      //    }else{
+      //       Res.statusCode = 400;
+      //       return Res.json({
+      //          error: 'not valid status'
+      //       });
+      //    }
+      // }
 
 
-      if (data && typeof(data) === 'string'){
-         const dataTest = /^\d\d\d\d-\d\d-\d\d$/.test(data);
-         if(dataTest){
-            const resultDates = taskService.getByDate(data);
-            Res.json(resultDates);
-         }else{
-            Res.statusCode = 400;
-            Res.json({
-               error: 'bad data format, only yyyy-mm-dd'
-            })
-            return
-         }
-      }
 
-      if(!data){
-         Res.statusCode = 400;
-         Res.json({
-            error: 'bad data type'
-         })
-         return
-      }
+
+      // if(!data){
+      //    Res.statusCode = 400;
+      //    Res.json({
+      //       error: 'bad data type'
+      //    })
+      //    return
+      // }
 
    };
 

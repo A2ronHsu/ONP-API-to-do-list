@@ -15,11 +15,12 @@ const authMiddleware = (Req:Request, Res:Response, next: NextFunction) => {
    }
 }
 
+const controllers = taskController;
 
 //home
 router.get('/', (req:Request, res:Response) : any =>{return res.json({get:'Home'})})
 //recuperar tarefa tal id
-router.get('/task/:id',(req: Request, res: Response) : any =>{taskController.getById(req, res);})
+router.get('/task/:id', (req: Request, res: Response) : any =>{taskController.getById(req, res);})
 //recuperar todas as tarefas
 router.get('/task',(req: Request, res: Response) : any =>{taskController.getAll(req, res);})
 //adicionar tarefa
