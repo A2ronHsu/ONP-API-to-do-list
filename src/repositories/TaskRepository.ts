@@ -14,8 +14,9 @@ class TaskRepository {
    }
 
    add(data:Task): Task{
+      data.id = this.tasks.length.toString();
       this.tasks.push(data);
-      return data;
+      return this.tasks[parseInt(data.id)];
    }
 
    idExist(id:string){
@@ -26,6 +27,7 @@ class TaskRepository {
    update(id:string, data : Task){
       const index = this.idExist(id);
       if(index){
+         data.id = id;
          this.tasks[index] = data;
          return true;
       }
