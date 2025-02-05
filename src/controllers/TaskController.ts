@@ -2,7 +2,9 @@ import { Request,Response } from "express";
 
 import TaskService from "../services/TaskService";
 import { Task } from "../models/Task";
-import { AddSchema, GetAllSchema, GetByIDSchema, UpdateSchema, UpdateSchemaParams } from "../schemas/TaskSchema";
+import { AddSchema, DeleteSchema, GetAllSchema, GetByIDSchema, UpdateSchema, UpdateSchemaParams } from "../schemas/TaskSchema";
+import { v4 as uuidv4 } from 'uuid';
+
 
 const taskService = new TaskService();
 
@@ -13,28 +15,32 @@ class TaskController{
 
    async getAll(Req: Request, Res: Response){
       try {
-         
          await GetAllSchema.validate(Req.query);
          const {status, data } = Req.query;
-         let result : Task[] = [];
+         let results : Task[] = [];
+
          if (status) {
-            result =  taskService.getByStatus(status as string);
-            console.log(result);
+            results =  taskService.getByStatus(status as string);
+      
          }
+
          if (data) {
             const tasks : Task[] = taskService.getByDate(data as string);
-            if(result.length){
-               result = result.concat(tasks.filter((elem)=>result.some(task => task.id === elem.id)));
+            if(results.length){
+               for( const task of tasks){
+                  const isAlreadyInResult = results.some(result=> result.id === task.id);
+                  if (!isAlreadyInResult) results.push(task)
+               }
             }else{
-               result = tasks;
+               results = tasks;
             }
-            console.log(result);
 
          };
+
          if(!data && !status){
-            result = taskService.getAll();
+            results = taskService.getAll();
          }
-         Res.json(result);
+         Res.json(results);
          Res.status(200);
 
       } catch (error) {
@@ -47,6 +53,7 @@ class TaskController{
    async add(Req: Request, Res: Response){
       try{
          await AddSchema.validate(Req.body);
+         Req.body.id = uuidv4();
          const result = taskService.add(Req.body);
          Res.json(result);
          Res.status(200);
@@ -56,22 +63,21 @@ class TaskController{
          Res.status(401)   
       }
       
-
-
-      
-
    }
 
    async getById (Req: Request, Res: Response){
-      const allData =taskService.getAll();
-      const {id} = Req.params;
-      await GetByIDSchema.validate(Req.params);
-      const data = allData.filter(task => task.id === id);
-      if(data.length){
-         Res.json(data);
-
-      }else{
-         Res.json('id não existe')
+      try {
+         await GetByIDSchema.validate(Req.params);
+         const {id} = Req.params;
+         const data : Task = taskService.getByID(id);
+         if(data) {
+            Res.json(data);
+   
+         }else{
+            Res.json('id não existe');
+         }
+      } catch (error) {
+         Res.json(error)
       }
       
    }
@@ -83,18 +89,16 @@ class TaskController{
       try {
          await UpdateSchema.validate(data);
          await UpdateSchemaParams.validate(id);
-
-         
-         if(taskService.update( id, data)) {
+         const isUptated = taskService.update( id, data);
+         if(isUptated) {
             Res.status(200);
             Res.json({
                updatedId: id,
                updatedData: data,
             })
          }else{
-            Res.status(400);
+            Res.status(401);
             Res.json({error:'id não existe'});
-
          }
       } catch (error) {
          Res.status(400);
@@ -105,11 +109,18 @@ class TaskController{
 
    delete(Req: Request, Res: Response){
       const {id} = Req.params;
-      if(taskService.delete(id)){
-         Res.json({success:`${id} deletado`})
-      }else{
-         Res.json({error:`${id} não existe`});
+      try{
+         DeleteSchema.validate(id);
+         if(taskService.delete(id)){
+            Res.json({success:`${id} deletado`})
+         }else{
+            Res.json({error:`${id} não existe`});
+         }
+      }catch(error){
+         Res.status(400);
+         Res.json(error);
       }
+
    }  
 
 

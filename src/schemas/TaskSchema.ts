@@ -44,7 +44,7 @@ export const AddSchema = object().shape({
 })
 
 export const GetByIDSchema = object().shape({
-   id: string().required()
+   id: string().required().uuid()
 })
 
 export const UpdateSchema = object().shape({
@@ -69,3 +69,5 @@ export const UpdateSchema = object().shape({
 })
 
 export const UpdateSchemaParams = string().required();
+
+export const DeleteSchema = string().required().uuid();

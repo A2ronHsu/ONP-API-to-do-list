@@ -17,6 +17,10 @@ class TaskService{
 
    }
 
+   getByID(id:string){
+      return taskRepository.getByID(id);
+   }
+
    getByStatus(status : string){
       const allData = taskRepository.getAll();
       return allData.filter(task => task.status === status )
@@ -33,12 +37,7 @@ class TaskService{
    }
 
    delete(id:string){
-      const idExist = taskRepository.idExist(id);
-      if(idExist){
-         return taskRepository.delete(idExist);
-      }else{
-         return false;
-      }
+      return taskRepository.delete(id);
    }
 }
 
