@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from "express";
-
 import TaskController from "./src/controllers/TaskController";
+import multer from "multer";
+import  storage  from "./src/utils/storage";
+
 
 const taskController = new TaskController();
 const router = Router();
@@ -15,6 +17,10 @@ const authMiddleware = (Req:Request, Res:Response, next: NextFunction) => {
    }
 }
 
+const upload = multer({storage})
+
+
+
 const controllers = taskController;
 
 //home
@@ -24,7 +30,7 @@ router.get('/task/:id', (req: Request, res: Response) : any =>{taskController.ge
 //recuperar todas as tarefas
 router.get('/task',(req: Request, res: Response) : any =>{taskController.getAll(req, res);})
 //adicionar tarefa
-router.post('/task', (req: Request, res: Response) : any =>{const json =taskController.add(req,res);})
+router.post('/task', upload.single('file'), (req: Request, res: Response) : any =>{const json =taskController.add(req,res);})
 //editar tarefa por id
 router.put('/task/:id',(req: Request, res: Response) : any =>{taskController.update(req, res);})
 //deletar
