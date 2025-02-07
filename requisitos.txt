@@ -35,3 +35,11 @@ Routes
          data
          status (completed|in_progress)
       }
+
+Autenticação vc Autorização
+   Autenticação: Valida a identidade do usuário.
+      - Email
+      - Senha
+      - Token
+   Autorização:
+      Determinar o que o usuário pode fazer
